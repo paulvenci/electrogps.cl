@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Electro GPS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.min.js"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f7f7f7;
+      }
+      .v-toolbar {
+        transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+      }
+      .scroll-up-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 50;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+      }
+      .scroll-up-btn.show {
+        opacity: 1;
+      }
+      .hero-image {
+        position: relative;
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      .fade-in {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      }
+      .fade-in.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <v-app>
+        <v-app-bar
+          app
+          :color="isScrolled ? 'grey-lighten-2' : 'transparent'"
+          :elevation="isScrolled ? 4 : 0"
+          :class="{'v-toolbar--scrolled': isScrolled}"
+        >
+          <v-container class="d-flex align-center">
+            <v-img src="./assets/Logo_ElectroGPS-01.png" alt="Electro GPS Logo" max-height="64" max-width="128" contain class="mr-4"></v-img>
+
+            <v-spacer></v-spacer>
+            <v-btn
+              v-for="item in navItems"
+              :key="item.id"
+              text
+              :class="{'text-white': !isScrolled, 'text-red-darken-2': isScrolled}"
+              @click="scrollToSection(item.id)"
+              class="hidden-sm-and-down"
+              >{{ item.name }}</v-btn
+            >
+
+            <v-app-bar-nav-icon
+              class="hidden-md-and-up"
+              @click="isMobileMenuOpen = !isMobileMenuOpen"
+              :color="isScrolled ? 'red-darken-2' : 'white'"
+            ></v-app-bar-nav-icon>
+          </v-container>
+        </v-app-bar>
+
+        <v-navigation-drawer v-model="isMobileMenuOpen" temporary location="right">
+          <v-list nav>
+            <v-list-item v-for="item in navItems" :key="item.id" @click="scrollToSection(item.id); isMobileMenuOpen = false">
+              <v-list-item-title>{{ item.name }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-navigation-drawer>
+
+        <v-main>
+          <v-sheet
+            id="inicio"
+            class="d-flex align-center justify-center text-center text-white"
+            :style="`height: 100vh; background-image: url('./assets/2.jpg'); background-size: cover; background-position: center;`"
+          >
+            <div class="hero-overlay"></div>
+            <v-container class="z-10">
+              <h1 class="text-h3 text-sm-h2 text-md-h1 font-weight-bold mb-4 drop-shadow-lg">Soluciones en Seguridad y Electrónica Vehicular</h1>
+              <p class="text-subtitle-1 text-sm-h5 font-weight-medium drop-shadow-lg">Protege tu vehículo con la mejor tecnología.</p>
+            </v-container>
+          </v-sheet>
+          ---
+          <v-container id="servicios" class="py-16 py-md-24">
+            <v-responsive class="mx-auto" max-width="800">
+              <h2 class="text-h4 text-md-h3 font-weight-bold text-center mb-12 fade-in">Nuestros Servicios</h2>
+            </v-responsive>
+            <v-row>
+              <v-col v-for="service in services" :key="service.id" cols="12" md="6" lg="4">
+                <v-card class="mx-auto pa-4 rounded-xl fade-in" elevation="10" hover>
+                  <v-img :src="service.image" :alt="service.title" height="200" cover class="rounded-lg mb-4"></v-img>
+                  <v-card-title class="text-red-darken-2 text-h5 font-weight-semibold">{{ service.title }}</v-card-title>
+                  <v-card-text class="text-subtitle-1 text-grey-darken-1">{{ service.description }}</v-card-text>
+                  <v-list v-if="service.features">
+                    <v-list-item v-for="feature in service.features" :key="feature" density="compact">
+                      <template v-slot:prepend>
+                        <v-icon color="green-darken-2">mdi-check-circle</v-icon>
+                      </template>
+                      <v-list-item-title class="text-grey-darken-1">{{ feature }}</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                  <v-divider class="my-4"></v-divider>
+                  <v-card-text class="text-center">
+                    <div v-if="service.price">
+                      <p class="text-h5 text-grey-darken-1">VALOR: ${{ service.price }}</p>
+                      <p class="text-subtitle-2 text-grey-lighten-1">{{ service.priceDescription }}</p>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
+          ---
+          <v-sheet id="precios" class="bg-grey-lighten-3 py-16 py-md-24">
+            <v-container class="text-center">
+              <v-responsive class="mx-auto" max-width="800">
+                <h2 class="text-h4 text-md-h3 font-weight-bold mb-6 fade-in">Nuestros Planes</h2>
+                <h3 class="text-h6 text-md-h5 text-grey-darken-1 mb-12 fade-in">Elige un plan que se ajuste a tus necesidades.</h3>
+              </v-responsive>
+              <v-row justify="center" class="d-flex flex-wrap">
+                <v-col v-for="plan in pricing" :key="plan.id" cols="12" sm="10" md="6" lg="5">
+                  <v-card class="pa-6 rounded-xl fade-in" :class="{'bg-red-darken-4 text-white': plan.isFeatured}" elevation="16">
+                    <v-chip
+                      v-if="plan.isFeatured"
+                      color="red-darken-1"
+                      variant="elevated"
+                      class="position-absolute top-0 right-0 mt-n3 mr-n3 font-weight-bold"
+                    >
+                      MÁS POPULAR
+                    </v-chip>
+                    <v-card-title class="text-h5 font-weight-bold text-center pt-8">{{ plan.name }}</v-card-title>
+                    <v-list :class="plan.isFeatured ? 'bg-transparent' : ''" nav>
+                      <v-list-item v-for="feature in plan.features" :key="feature" density="compact">
+                        <template v-slot:prepend>
+                          <v-icon :color="plan.isFeatured ? 'white' : 'red-darken-2'">mdi-check-circle-outline</v-icon>
+                        </template>
+                        <v-list-item-title :class="{'text-white': plan.isFeatured}">{{ feature }}</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                    <v-divider class="my-4" :color="plan.isFeatured ? 'white' : ''"></v-divider>
+                    <v-card-text class="text-center">
+                      <p class="text-h3 font-weight-extrabold mb-2">{{ plan.price }}</p>
+                      <p class="text-body-1" :class="plan.isFeatured ? 'text-grey-lighten-2' : 'text-grey-darken-1'">{{ plan.priceDescription }}</p>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-btn
+                        block
+                        size="large"
+                        class="mt-4 font-weight-bold"
+                        :color="plan.isFeatured ? 'white' : 'red-darken-2'"
+                        :variant="plan.isFeatured ? 'elevated' : 'flat'"
+                        >Contáctanos</v-btn
+                      >
+                    </v-card-actions>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-sheet>
+          ---
+          <v-container id="contacto" class="py-16 py-md-24">
+            <h2 class="text-h4 text-md-h3 font-weight-bold text-center mb-12 fade-in">Contáctanos</h2>
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-card class="pa-8 rounded-xl fade-in" elevation="10">
+                  <v-form @submit.prevent="submitForm">
+                    <v-text-field v-model="form.name" label="Nombre" variant="outlined" required class="mb-4"></v-text-field>
+                    <v-text-field v-model="form.email" label="Email" variant="outlined" required type="email" class="mb-4"></v-text-field>
+                    <v-textarea v-model="form.message" label="Mensaje" variant="outlined" rows="5" required class="mb-4"></v-textarea>
+                    <v-btn type="submit" block size="large" color="red-darken-2" class="font-weight-bold">Enviar Mensaje</v-btn>
+                  </v-form>
+                </v-card>
+              </v-col>
+              <v-col cols="12" md="6" class="fade-in">
+                <v-card class="pa-8 rounded-xl mb-8" elevation="10">
+                  <h3 class="text-h5 font-weight-semibold mb-4 text-red-darken-2">Nuestra Ubicación</h3>
+                  <p class="text-subtitle-1 text-grey-darken-1 mb-4">
+                    Estamos ubicados en:<br />Av. Concha y Toro 0741, Puente Alto, Santiago, Chile
+                  </p>
+                  <div class="rounded-xl overflow-hidden" style="height: 256px">
+                    <iframe
+                      class="w-100 h-100"
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3326.6579361840816!2d-70.57469792376974!3d-33.51347077335688!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662d08a5c2d3091%3A0x8683e39023246f6!2sAv.%20Concha%20y%20Toro%200741%2C%20Puente%20Alto%2C%20Regi%C3%B3n%20Metropolitana!5e0!3m2!1sen!2scl!4v1701386616010!5m2!1sen!2scl"
+                      allowfullscreen=""
+                      loading="lazy"
+                    ></iframe>
+                  </div>
+                </v-card>
+                <v-card class="pa-8 rounded-xl" elevation="10">
+                  <h3 class="text-h5 font-weight-semibold mb-4 text-red-darken-2">Horario de Atención</h3>
+                  <v-list class="bg-transparent text-subtitle-1 text-grey-darken-1">
+                    <v-list-item>
+                      <v-list-item-title><strong>Lunes a Jueves:</strong> 10:00 - 18:00 hrs.</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item>
+                      <v-list-item-title><strong>Viernes:</strong> 10:00 - 17:00 hrs.</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item>
+                      <v-list-item-title><strong>Sábado, Domingo y festivos:</strong> Cerrado</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
+          ---
+        </v-main>
+
+        <v-btn :class="['scroll-up-btn', isScrolled ? 'show' : '']" icon size="large" color="red-darken-2" @click="scrollToTop">
+          <v-icon>mdi-arrow-up</v-icon>
+        </v-btn>
+
+        <v-footer class="bg-black text-white py-12">
+          <v-container class="text-center">
+            <p class="text-h6 font-weight-medium mb-4">Síguenos en nuestras redes sociales</p>
+            <div class="d-flex justify-center ga-4 mb-8">
+              <v-btn icon color="white" href="https://www.facebook.com/electrogpschile" target="_blank">
+                <v-icon size="24">mdi-facebook</v-icon>
+              </v-btn>
+              <v-btn icon color="white" href="https://www.instagram.com/electrogpschile/" target="_blank">
+                <v-icon size="24">mdi-instagram</v-icon>
+              </v-btn>
+            </div>
+            <p>© 2024 Electro GPS. Todos los derechos reservados.</p>
+          </v-container>
+        </v-footer>
+      </v-app>
+    </div>
+
+    <script>
+      const { createApp, ref, onMounted, onUnmounted } = Vue;
+      const { createVuetify } = Vuetify;
+
+      const vuetify = createVuetify();
+
+      createApp({
+        setup() {
+          const isMobileMenuOpen = ref(false);
+          const isScrolled = ref(false);
+          const form = ref({
+            name: "",
+            email: "",
+            message: "",
+          });
+          const navItems = [
+            { id: "inicio", name: "Inicio" },
+            { id: "servicios", name: "Servicios" },
+            { id: "precios", name: "Precios" },
+            { id: "electrogps", name: "Electrogps" },
+            { id: "consultarDeuda", name: "Consultar Deuda" },
+          ];
+          const services = [
+            {
+              id: "gps",
+              title: "Sistemas GPS Vehiculares",
+              description: "Protege tu vehículo con nuestro sistema GPS de última generación.",
+              image: "./assets/2.jpg",
+              features: [
+                "Plataforma Online 24/7",
+                "Detención a distancia",
+                "Alarmas programables (geocerca, exceso de velocidad)",
+                "Historial de trayectos",
+              ],
+              price: "10.000",
+              priceDescription: "Precio mensual",
+            },
+            {
+              id: "inmovilizador",
+              title: "Inmovilizador Vehicular",
+              description: "Sistema de alta seguridad para autos y motos con tecnología de punta.",
+              image: "./assets/inmovilizador.jpg",
+              features: ["Activación automática", "Bajo consumo de energía", "Botón de emergencia", "Incluye instalación"],
+              price: "65.000",
+              priceDescription: "Inmovilizador e instalación",
+            },
+            {
+              id: "seguridad-electronica",
+              title: "Electrónica en Seguridad",
+              description: "Instalación profesional de sistemas de seguridad para tu vehículo.",
+              image: "./assets/seguridad vehicular.jpg",
+              features: ["Instalación de alarmas", "Cierres centralizados", "Alzavidrios eléctricos", "Mantenimiento de sistemas"],
+              price: "Consultar",
+              priceDescription: "Depende del servicio",
+            },
+            {
+              id: "mecanizado-automatizado",
+              title: "Mecanizado automatizado",
+              description: "Mecanizado automatizado de diferentes tipos de llaves",
+              image: "./assets/llaves01.png",
+              features: [
+                "Generamos cortes desde cero o en caso de que su llave esté gastada o rota",
+                "Consulte mecanizado a partir de una fotografia de su llave",
+              ],
+              price: "Consultar",
+              priceDescription: "Depende del tipo de llave",
+            },
+            {
+              id: "copia-llave",
+              title: "Copia de llave con chip",
+              description:
+                "Si solo cuenta con una llave de su vehiculo, se recomienda realizar copia. Si la extravía, la reposición desde cero tiene un costo muy elevado. Para esto, contamos con gran variedad de llaves y chip.",
+              image: "./assets/Copia de llave.jpg",
+              features: [],
+              price: "Consultar",
+              priceDescription: "Depende del tipo de llave y chip",
+            },
+            {
+              id: "programacion-obd2",
+              title: "Programación via OBDII o EEPROM",
+              description:
+                "Programación de chip o control via OBDII o EEPROM con vehículo. Posibilidad de programar con chip o controles antiguos que no funcionan con su vehículo.",
+              image: "./assets/llaves05.png",
+              features: [],
+              price: "Consultar",
+              priceDescription: "Depende del servicio",
+            },
+          ];
+          const pricing = [
+            {
+              id: 1,
+              name: "GPS Prepago",
+              price: "$85.000",
+              priceDescription: "Pago único",
+              isFeatured: false,
+              features: ["Dispositivo GPS 4G", "Instalación", "Corta corriente", "Control vía SMS", "Chip PrePago (cliente recarga)"],
+            },
+            {
+              id: 2,
+              name: "GPS Mensual",
+              price: "$85.000",
+              priceDescription: "Instalación y dispositivo + $9.000 mensual",
+              isFeatured: true,
+              features: [
+                "Dispositivo GPS 4G",
+                "Instalación",
+                "Corta corriente",
+                "Control vía aplicación móvil o web",
+                "Plataforma online 24/7 propia",
+                "Visualización en tiempo real",
+                "Alarmas programables (geocerca, velocidad, desconexión, etc.)",
+                "Reportes e historial de trayectos (30 días)",
+                "Control de mantenimiento vehicular",
+              ],
+            },
+            {
+              id: 3,
+              name: "GPS Anual",
+              price: "$85.000",
+              priceDescription: "Instalación y dispositivo + $9.000 mensual",
+              isFeatured: true,
+              features: [
+                "Dispositivo GPS 4G",
+                "Instalación",
+                "Corta corriente",
+                "Control vía aplicación móvil o web",
+                "Plataforma online 24/7 propia",
+                "Visualización en tiempo real",
+                "Alarmas programables (geocerca, velocidad, desconexión, etc.)",
+                "Reportes e historial de trayectos (30 días)",
+                "Control de mantenimiento vehicular",
+              ],
+            },
+          ];
+
+          const handleScroll = () => {
+            isScrolled.value = window.scrollY > 50;
+          };
+
+          const scrollToSection = (id) => {
+            const element = document.getElementById(id);
+            if (element) {
+              window.scrollTo({
+                top: element.offsetTop - 64, // Ajusta para el app bar fijo
+                behavior: "smooth",
+              });
+            }
+          };
+
+          const scrollToTop = () => {
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          };
+
+          const submitForm = () => {
+            console.log("Formulario enviado:", form.value);
+            // Lógica de envío de formulario aquí
+            alert("¡Mensaje Enviado! Gracias por tu mensaje, nos pondremos en contacto contigo pronto.");
+            form.value = { name: "", email: "", message: "" };
+          };
+
+          const addIntersectionObservers = () => {
+            const observerOptions = {
+              root: null,
+              rootMargin: "0px",
+              threshold: 0.1,
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("is-visible");
+                  observer.unobserve(entry.target);
+                }
+              });
+            }, observerOptions);
+
+            document.querySelectorAll(".fade-in").forEach((el) => {
+              observer.observe(el);
+            });
+          };
+
+          onMounted(() => {
+            window.addEventListener("scroll", handleScroll);
+            addIntersectionObservers();
+          });
+
+          onUnmounted(() => {
+            window.removeEventListener("scroll", handleScroll);
+          });
+
+          return {
+            isMobileMenuOpen,
+            isScrolled,
+            form,
+            navItems,
+            services,
+            pricing,
+            scrollToSection,
+            scrollToTop,
+            submitForm,
+          };
+        },
+      })
+        .use(vuetify)
+        .mount("#app");
+    </script>
+  </body>
+</html>

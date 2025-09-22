@@ -1,0 +1,359 @@
+// const axios = requiere('axios').default;
+
+// const axios = require('axios');
+
+// Used to toggle the menu on small screens when clicking on the menu button
+function myFunction() {
+    var x = document.getElementById("navDemo");
+    if (x.className.indexOf("w3-show") == -1) {
+        x.className += " w3-show";
+    } else {
+        x.className = x.className.replace(" w3-show", "");
+    }
+}
+
+function acordion(id) {
+
+    var x = document.getElementById(id);
+    if (x.className.indexOf("w3-show") == -1) {
+        x.className += " w3-show";
+    } else {
+        x.className = x.className.replace(" w3-show", "");
+    }
+}
+
+// Script for side navigation
+function w3_open() {
+    var x = document.getElementById("mySidebar");
+    x.style.width = "300px";
+    x.style.paddingTop = "10%";
+    x.style.display = "block";
+}
+
+// Close side navigation
+function w3_close() {
+    document.getElementById("mySidebar").style.display = "none";
+}
+
+// Used to toggle the menu on smaller screens when clicking on the menu button
+function openNav() {
+    var x = document.getElementById("navDemo");
+    if (x.className.indexOf("w3-show") == -1) {
+        x.className += " w3-show";
+    } else {
+        x.className = x.className.replace(" w3-show", "");
+    }
+}
+
+// document.addEventListener("DOMContentLoaded", function (event) {
+
+//     console.log("iniciando...");
+
+//     cargaData("241");
+// });
+
+let nombre = document.getElementById("tdNombre");
+let razon = document.getElementById("tdRazon");
+let rut = document.getElementById("tdRut");
+let correo = document.getElementById("tdCorreo");
+let celular = document.getElementById("tdCelular");
+let tablas = document.getElementById("tablas");
+
+Array.prototype.unique = function (a) {
+    return function () { return this.filter(a) }
+}(function (a, b, c) {
+    return c.indexOf(a, b + 1) < 0
+});
+let mail = document.getElementById("mail");
+let password = document.getElementById("pass");
+
+async function registraPass() {
+    var correo = document.getElementById("correo");
+    var pass1 = document.getElementById("pass1");
+    var pass2 = document.getElementById("pass2");
+    if (pass1.value == pass2.value) {
+        var password = document.getElementById("pass1");
+        datos = { idCliente: id, password: password.value };
+        console.log(datos, id);
+        await axios.post('https://143.110.235.148:443/api/areaCliente/pass', datos)
+            .then((response) => {
+                console.log(response);
+                if (response.data.estado) {
+                    alert("Password actualizada!")
+                    window.open("index.html", "_self")
+                } else {
+                    alert("Error al actualizar password")
+                }
+            })
+    } else {
+        alert("Las password no coinciden..")
+    }
+}
+let token;
+function consulta(){
+    alert("Consulta");
+    window.open('http://143.110.235.148:4001/public/areaCliente.html','_self')
+}
+    
+function login2() {
+datos = { mail: mail.value };
+    console.log(datos);
+    window.open("http://143.110.235.148:4001/public/areaCliente.html?mail="+mail, "_self");
+    
+}
+
+    
+async function login() {
+    datos = { mail: mail.value };
+    console.log(datos);
+    window.open("http://143.110.235.148:4001/public/areaCliente.html?mail="+mail, "_self");
+        
+    // await axios.post('https://62.171.152.85:443/api/areaCliente/validar/cliente', datos)
+    //     .then(function (res) {
+    //         if (res.status == 202) {
+    //             console.log('Ingreso con éxito');
+    //             var datos = res.data.objeto;
+    //             var datosCliente = "id=" + datos.id + ",mail=" + mail.value
+    //             window.open("areaCliente.html?" + datosCliente, "_self")
+    //         } else {
+    //             if (res.status == 401) {
+    //                 alert("Correo no registrado")
+    //             }
+    //         }
+    //     })
+    //     .catch(function (err) {
+    //         alert("Correo no registrado")
+    //         console.log(err);
+    //     })
+    //     .then(function () {
+    //         console.log('Error');
+    //         mail.value = "";
+    //     });
+
+
+    // axios.post('https://62.171.152.85/api/areaCliente/validar/cliente', datos)
+    //     .then((response) => {
+    //         console.log(response);
+    //         if (response.data.estado) {
+    //             var datos = response.data.objeto;
+    //             console.log(datos);
+
+    //             // if (datos.reset == "1") {
+    //             //     console.log('Cliente Reset');
+    //             //     var datosCliente = "id=" + datos.id + ",mail=" + datos.correo
+    //             //     window.open("resetPass.html?" + datosCliente, "_self")
+    //             // } else {
+    //             //     var datosCliente = "id=" + datos.id
+    //             //     window.open("areaCliente.html?" + datosCliente, "_self")
+    //             // }
+    //         } else {
+    //             console.log(response);
+    //             alert("Correo ingresado no se encuentra en los registros");
+    //         }
+    //     })
+}
+
+async function cargaData(idCliente, _mail) {
+    axios.get('https://62.171.152.85:443/api/areaCliente/' + idCliente)
+        .then(async (response) => {
+
+            if (response.status == 200) {
+                var datos = response.data.objeto;
+                if (datos[0].cliente_tipo == "P") {
+                    nombre.innerHTML = datos[0].cliente_nombres + " " + datos[0].cliente_paterno + " " + datos[0].cliente_materno
+                } else {
+                    nombre.innerHTML = datos[0].cliente_nombres;
+                }
+                rut.innerHTML = datos[0].cliente_rut;
+                correo.innerHTML = datos[0].cliente_mail;
+                celular.innerHTML = datos[0].cliente_celular;
+
+                cargaTabla(datos);
+
+            } else {
+                // console.log(response.data.objeto.length);
+                console.log("Respuesta Cod: " + response.status);
+
+                if (response.status == 204) {
+                    datosPost = { idCli: idCliente };
+                    console.log(datosPost);
+                    await axios.post('https://62.171.152.85:443/api/areaCliente/consulta/cliente', datosPost)
+                        .then(function (res) {
+                            if (res.status == 202) {
+
+                                var datos = res.data.objeto;
+                                console.log(datos);
+
+                                if (datos.tipo == "P") {
+                                    nombre.innerHTML = datos.nombres + " " + datos.apellidoPaterno + " " + datos.apellidoMaterno
+                                } else {
+                                    nombre.innerHTML = datos.nombres;
+                                }
+                                rut.innerHTML = datos.rut;
+                                correo.innerHTML = datos.correo;
+                                celular.innerHTML = datos.celular;
+                                var alDiaHtml = `
+                                    <div class="w3-panel w3-blue">
+                                    <h3>Impeke!</h3>
+                                    <p>Tienes tu cuenta al día!, gracias por seguir con Electro GPS.</p>
+                                    </div>`
+                                tablas.insertAdjacentHTML("afterend", alDiaHtml)
+                            } else {
+                                if (res.status == 401) {
+                                    alert("Correo no registrado")
+                                }
+                            }
+                        })
+                }
+                console.log("Sin Datos");
+            }
+
+        })
+}
+const formatterPeso = new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP',
+    minimumFractionDigits: 0
+})
+
+function salir() {
+    window.open("index.html", "_self")
+};
+
+function generaPass() {
+    var passCliente = document.getElementById("pass").value;
+    var mailCliente = document.getElementById("mail").value;
+    if (mailCliente == "") {
+
+        alert("Favor ingrese correo electrónico");
+    } else {
+        enviaMail(mailCliente);
+    };
+};
+
+async function enviaMail(_mail) {
+    datos = { mail: _mail };
+    await axios.post('https://143.110.235.148:443/api/areaCliente/mail', datos)
+        .then((response) => {
+            console.log(response.data.estado);
+            if (response.data.estado) {
+                alert("Se ha enviado password temporal a su correo " + _mail);
+            } else {
+                alert("Error al generar la password");
+            };
+        });
+};
+
+function cargaTabla(datos) {
+    var cocab = [];
+    for (var i = 0; i <= datos.length - 1; i++) {
+        cocab.push(datos[i].cobrocab_id)
+    }
+
+    var ncobros = cocab.unique().length
+    var cocabUniq = cocab.unique();
+    var cobrosCab = [];
+    var cobroDet = [];
+    console.log(cocab.unique() + " N° Cobros: " + ncobros);
+
+    for (var i = 0; i < cocabUniq.length; i++) {
+        for (var j = 0; j < datos.length; j++) {
+            if (cocabUniq[i] == datos[j].cobrocab_id) {
+                cobrosCab.push({ id: datos[j].cobrocab_id, total: datos[j].cobrocab_total, url: datos[j].cobrocab_url, fechaVencimiento: datos[j].cuota_fechaVencimiento, cuota: datos[j].cuota_numCuota, codet: [] });
+                break;
+            }
+        }
+    }
+
+    for (var i = 0; i < cobrosCab.length; i++) {
+        for (var j = 0; j < datos.length; j++) {
+            if (cobrosCab[i].id == datos[j].cobrocab_id) {
+                cobroDet.push({ numCuota: datos[j].cuota_numCuota, vehiculo: datos[j].vehiculo_marca + " " + datos[j].vehiculo_modelo + " " + datos[j].vehiculo_color + " " + datos[j].vehiculo_año, patente: datos[j].vehiculo_patente, valor: datos[j].cuota_monto })
+            }
+        }
+        cobrosCab[i].codet.push(cobroDet)
+        cobroDet = [];
+    }
+
+    console.log(cobrosCab);
+    // console.log(cobrosCab[0].codet[0][0].patente);
+    // console.log(cobrosCab[0].codet[0][1].patente);
+
+    for (var nt = 0; nt < cobrosCab.length; nt++) {
+        var datosDet = "";
+        for (var i = 0; i < cobrosCab[nt].codet[0].length; i++) {
+            datosDet = datosDet + '<tr><td style="text-align: center; background: #e7edff;">' + cobrosCab[nt].codet[0][i].vehiculo + `</td>
+            <td style="text-align: center; background: #e7edff;">` + cobrosCab[nt].codet[0][i].patente + `</td> 
+            <td style="text-align: center; background: #e7edff;">` + formatterPeso.format(cobrosCab[nt].codet[0][i].valor) + '</td></tr>'
+        }
+        var miTabla = `
+<center class="w3-hover-border-blue w3-border w3-round w3-card">
+    <table CELLPADDING=5 style="font-family: 'Lucida Sans Unicode' ; font-size:'14px'; width: 100%;">
+        <tbody>
+
+            <tr>
+                <th style="border-color:'blue'; background: #5B507C " colspan="4">
+                    <font color="white">ESTADO DE CUENTA</font>
+                </th>
+            </tr>
+            <tr style="background: #8d95ad">
+                <th>Fecha Vencimiento</th>
+                <th>Cuota N°</th>
+                <th>Total</th>
+            </tr>
+            <!-- dinámico -->
+            <td style="background: #e7edff; text-align: center">` + moment(cobrosCab[nt].fechaVencimiento).format("DD/MM/YYYY") + `</td>
+            <td style="background: #e7edff; text-align: center">` + cobrosCab[nt].cuota + `</td>
+            <td style="background: #e7edff; text-align: center">` + formatterPeso.format(cobrosCab[nt].total) + `</td>
+
+            <tr>
+                <th style="background:  #5B507C" colspan="5">
+                    <font color="white">DETALLE </font>
+                </th>
+            </tr>
+            <tr style="background: #bfc6db">
+                <th>Vehículo</th>
+                <th>Patente</th>
+                <th>Valor</th>
+            </tr> ` + datosDet + `
+            <tr>
+                <td colspan="4" align="center" style="background: #d4d7df">
+                    <a href="` + cobrosCab[nt].url + `" target="_blank">
+                        <button
+                            style="text-decoration: none; color: #ffffff; padding: 10px; padding-left: 30px; padding-right: 30px; background-color: #005bbb; font-weight: 200; font-family: Verdana, Geneva, Tahoma, sans-serif; font-size: medium; cursor: pointer;">
+                            PAGAR </button>
+
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    </center>
+    <div style = "padding:15px"; ></div>
+`;
+        tablas.insertAdjacentHTML("afterend", miTabla)
+    }
+
+}
+
+function cotizaAnual() {
+    var texto = document.getElementById("textoMail")
+    texto.value = "Estoy interesado en el servicio de suscripción anual, me podrían contactar?"
+    window.location.href = "#contacto";
+}
+function cotizaMensual() {
+    var texto = document.getElementById("textoMail")
+    texto.value = "Estoy interesado en el servicio de suscripción mensual, me podrían contactar?"
+    window.location.href = "#contacto";
+
+}
+function cotizaPrepago() {
+    var texto = document.getElementById("textoMail")
+    texto.value = "Estoy interesado en el servicio prepago, me podrían contactar?"
+    window.location.href = "#contacto";
+
+}
+
+function enviaMailContacto() {
+
+}
